@@ -1,0 +1,41 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Expense {
+  id              String   @id @default(uuid())
+  amount          Float
+  description     String
+  categoryType    String // need or want
+  subcategory     String
+  transactionDate DateTime
+  source          String // chat or csv
+  createdAt       DateTime @default(now())
+}
+
+model Budget {
+  id          String   @id @default(uuid())
+  month       Int
+  year        Int
+  totalAmount Float
+  createdAt   DateTime @default(now())
+
+  @@unique([month, year])
+}
+
+model CategoryRule {
+  id          String @id @default(uuid())
+  keyword     String @unique
+  subcategory String
+  type        String // need or want
+}
