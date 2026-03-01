@@ -98,6 +98,8 @@ const getDashboardAnalytics = async (month, year) => {
         const diffAmount = totalSpent - expectedSpend;
         const diffPercentage = expectedSpend > 0 ? (Math.abs(diffAmount) / expectedSpend) * 100 : 0;
 
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
         comparison = {
             diffAmount: Math.abs(diffAmount),
             diffPercentage: Math.round(diffPercentage),
@@ -105,7 +107,8 @@ const getDashboardAnalytics = async (month, year) => {
             prevTotalSpent,
             prevDailyAvg: Math.round(prevDailyAvg),
             expectedSpend,
-            type: 'average'
+            type: 'average',
+            prevMonthName: monthNames[prevMonth - 1]
         };
     }
 

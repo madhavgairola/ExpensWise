@@ -277,7 +277,7 @@ function App() {
                   <span>
                     {analytics.comparison?.trend === 'stable' || !analytics.comparison
                       ? 'On track'
-                      : `${analytics.comparison.trend === 'down' ? '+' : '-'}₹${analytics.comparison.diffAmount}`}
+                      : `${analytics.comparison.trend === 'down' ? '+' : '-'}₹${analytics.comparison.diffAmount} wrt ${analytics.comparison.prevMonthName?.toLowerCase() || 'last month'}`}
                   </span>
                 </div>
               </div>
