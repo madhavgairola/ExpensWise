@@ -40,18 +40,21 @@ const fallbackProcess = async (message) => {
             }
         }
 
-        const amountRegex = /[₹\$]?(\d+(?:\.\d{1,2})?)/g;
+        const amountRegex = /[₹\$]?(\d+(?:\.\d{1,2})?)([kK])?\b/g;
         const numberMatches = [...segTrim.matchAll(amountRegex)];
         let amount = 0;
 
         if (numberMatches.length === 1) {
             amount = parseFloat(numberMatches[0][1]);
+            if (numberMatches[0][2]) amount *= 1000;
             amountMatchRaw = numberMatches[0][0];
         } else if (numberMatches.length > 1) {
             // First number might be the date. If it's small, pick the second one.
-            const firstNum = parseFloat(numberMatches[0][1]);
-            const secondNum = parseFloat(numberMatches[1][1]);
-            if (firstNum <= 31 && numberMatches[0][0].indexOf('₹') === -1 && numberMatches[0][0].indexOf('$') === -1) {
+            const firstNum = parseFloat(numberMatches[0][1]) * (numberMatches[0][2] ? 1000 : 1);
+            const secondNum = parseFloat(numberMatches[1][1]) * (numberMatches[1][2] ? 1000 : 1);
+
+            // If the first number could be a date (<=31, no currency symbol, no 'k' suffix), take the second number
+            if (firstNum <= 31 && numberMatches[0][0].indexOf('₹') === -1 && numberMatches[0][0].indexOf('$') === -1 && !numberMatches[0][2]) {
                 amount = secondNum;
                 amountMatchRaw = numberMatches[1][0];
             } else {

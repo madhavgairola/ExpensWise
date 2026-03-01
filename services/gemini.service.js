@@ -45,6 +45,7 @@ const classifyAndParseMessage = async (message) => {
     Rules:
     - If user says "bonus", "salary", "received", "income", classify as ADD_BUDGET.
     - If user says "set budget", "update budget", "decrease budget", classify as SET_BUDGET.
+    - Treat 'k' or 'K' suffix on an amount as thousands (e.g., "5k" = 5000, "1.5k" = 1500).
     - If there are multiple entries separated by semicolons (;), process ALL of them into the data array.
     - Example: "food 100 need; taxi 200 want" -> [{"amount": 100, "description": "Food", "categoryType": "need", ...}, {"amount": 200, "description": "Taxi", "categoryType": "want", ...}]
     - For ADD_EXPENSE, "need" is for essentials (Rent, Groceries, Utils, Metro, Bills, Food, College), "want" is for everything else.
