@@ -217,9 +217,9 @@ function App() {
               )}
             </p>
           </div>
-          <button className="card glass-card" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', color: 'white' }}>
+          <button className="card glass-card" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', color: 'white' }} onClick={() => alert("To be added soon!")}>
             <Download size={18} />
-            Export CSV
+            Export CSV (Soon)
           </button>
         </header>
 
