@@ -165,13 +165,13 @@ function App() {
             <CreditCard size={20} />
             <span>Transactions</span>
           </a>
-          <a href="#" className="nav-item" title="Budgets">
+          <a href="#" className="nav-item" title="Budgets" onClick={(e) => { e.preventDefault(); alert("To be added soon!"); }}>
             <Target size={20} />
-            <span>Budgets</span>
+            <span>Budgets (Soon)</span>
           </a>
-          <a href="#" className="nav-item" title="Import">
+          <a href="#" className="nav-item" title="Import" onClick={(e) => { e.preventDefault(); alert("To be added soon!"); }}>
             <FileUp size={20} />
-            <span>Import</span>
+            <span>Import (Soon)</span>
           </a>
         </nav>
 
