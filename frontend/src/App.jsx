@@ -52,18 +52,29 @@ function App() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    let lastIsMobile = window.innerWidth <= 768;
+
     const handleResize = () => {
-      const mobile = window.innerWidth <= 768;
-      setIsMobile(mobile);
-      if (mobile) {
-        setIsLeftRetracted(true);
-        setIsRightRetracted(true);
-      } else {
-        setIsLeftRetracted(false);
-        setIsRightRetracted(false);
+      const currentlyMobile = window.innerWidth <= 768;
+      if (currentlyMobile !== lastIsMobile) {
+        setIsMobile(currentlyMobile);
+        if (currentlyMobile) {
+          setIsLeftRetracted(true);
+          setIsRightRetracted(true);
+        } else {
+          setIsLeftRetracted(false);
+          setIsRightRetracted(false);
+        }
+        lastIsMobile = currentlyMobile;
       }
     };
-    handleResize();
+
+    setIsMobile(lastIsMobile);
+    if (lastIsMobile) {
+      setIsLeftRetracted(true);
+      setIsRightRetracted(true);
+    }
+
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
