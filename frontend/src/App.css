@@ -408,7 +408,7 @@
   }
 
   .right-sidebar {
-    width: 320px;
+    width: 100vw;
     transform: translateX(100%);
     box-shadow: -10px 0 20px rgba(0, 0, 0, 0.5);
   }
@@ -418,7 +418,7 @@
   }
 
   .right-sidebar.retracted {
-    width: 320px;
+    width: 100vw;
     transform: translateX(100%);
   }
 

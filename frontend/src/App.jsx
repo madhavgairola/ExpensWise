@@ -602,6 +602,15 @@ function App() {
         <div className="chat-widget">
           <div className="chat-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              {isMobile && (
+                <button
+                  onClick={() => setIsRightRetracted(true)}
+                  className="action-btn"
+                  style={{ display: 'flex', alignItems: 'center', marginRight: '0.5rem', padding: 0 }}
+                >
+                  <ChevronRight size={20} color="var(--text-primary)" />
+                </button>
+              )}
               <BrainCircuit size={18} color="#3ecf8e" />
               <span>Assistant</span>
             </div>
