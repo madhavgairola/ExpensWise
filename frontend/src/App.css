@@ -9,6 +9,7 @@
 
 .app-container {
   display: flex;
+  min-height: 100vh;
   min-height: 100dvh;
   background-color: var(--bg-primary);
   overflow-x: hidden;
@@ -22,6 +23,7 @@
   flex-direction: column;
   padding: 1.5rem;
   position: fixed;
+  height: 100vh;
   height: 100dvh;
   z-index: 100;
   transition: width var(--transition-speed) var(--transition-curve), padding var(--transition-speed) var(--transition-curve);
@@ -42,6 +44,7 @@
   flex-direction: column;
   position: fixed;
   right: 0;
+  height: 100vh;
   height: 100dvh;
   z-index: 100;
   transition: width var(--transition-speed) var(--transition-curve);
