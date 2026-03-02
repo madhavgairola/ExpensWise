@@ -20,7 +20,8 @@ import {
   Trash2,
   Pencil,
   Check,
-  Edit2
+  Edit2,
+  Menu
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -48,6 +49,24 @@ function App() {
   const [selectedMonthDetail, setSelectedMonthDetail] = useState(null);
   const [isLeftRetracted, setIsLeftRetracted] = useState(false);
   const [isRightRetracted, setIsRightRetracted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (mobile) {
+        setIsLeftRetracted(true);
+        setIsRightRetracted(true);
+      } else {
+        setIsLeftRetracted(false);
+        setIsRightRetracted(false);
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const fetchData = async () => {
     try {
@@ -137,11 +156,24 @@ function App() {
 
   return (
     <div className="app-container">
+      {/* Mobile Overlay */}
+      {isMobile && (!isLeftRetracted || !isRightRetracted) && (
+        <div
+          onClick={() => { setIsLeftRetracted(true); setIsRightRetracted(true); }}
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(3px)', zIndex: 90
+          }}
+        />
+      )}
+
       {/* Left Sidebar */}
       <aside className={`sidebar ${isLeftRetracted ? 'retracted' : ''}`} onClick={() => isLeftRetracted && setIsLeftRetracted(false)}>
-        <button className="retract-btn" onClick={(e) => { e.stopPropagation(); setIsLeftRetracted(!isLeftRetracted); }}>
-          {isLeftRetracted ? <ChevronsRight size={14} /> : <ChevronsLeft size={14} />}
-        </button>
+        {!isMobile && (
+          <button className="retract-btn" onClick={(e) => { e.stopPropagation(); setIsLeftRetracted(!isLeftRetracted); }}>
+            {isLeftRetracted ? <ChevronsRight size={14} /> : <ChevronsLeft size={14} />}
+          </button>
+        )}
         <div className="logo">
           <BrainCircuit size={28} />
           <span>ExpensWise</span>
@@ -206,7 +238,24 @@ function App() {
 
       {/* Main Content */}
       <main className={`main-content ${isLeftRetracted ? 'left-retracted' : ''} ${isRightRetracted ? 'right-retracted' : ''}`}>
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+
+        {/* Mobile Header (Hidden on Desktop via CSS) */}
+        {isMobile && (
+          <div className="mobile-header">
+            <button onClick={() => setIsLeftRetracted(false)} className="action-btn">
+              <Menu size={24} color="var(--text-primary)" />
+            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, fontSize: '1.25rem' }}>
+              <BrainCircuit size={24} color="#3ecf8e" />
+              <span>ExpensWise</span>
+            </div>
+            <button onClick={() => setIsRightRetracted(false)} className="action-btn">
+              <MessageSquare size={24} color="#818cf8" />
+            </button>
+          </div>
+        )}
+
+        <header className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
           <div>
             <h1 style={{ fontSize: '1.875rem', fontWeight: 700 }}>Overview</h1>
             <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
@@ -218,7 +267,7 @@ function App() {
               )}
             </p>
           </div>
-          <button className="card glass-card" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', color: 'white' }} onClick={() => alert("To be added soon!")}>
+          <button className="card glass-card export-btn" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', color: 'white' }} onClick={() => alert("To be added soon!")}>
             <Download size={18} />
             Export CSV (Soon)
           </button>
@@ -545,9 +594,11 @@ function App() {
 
       {/* Right Sidebar (Assistant) */}
       <aside className={`right-sidebar ${isRightRetracted ? 'retracted' : ''}`} onClick={() => isRightRetracted && setIsRightRetracted(false)}>
-        <button className="right-retract-btn" onClick={(e) => { e.stopPropagation(); setIsRightRetracted(!isRightRetracted); }}>
-          {isRightRetracted ? <ChevronsLeft size={14} /> : <ChevronsRight size={14} />}
-        </button>
+        {!isMobile && (
+          <button className="right-retract-btn" onClick={(e) => { e.stopPropagation(); setIsRightRetracted(!isRightRetracted); }}>
+            {isRightRetracted ? <ChevronsLeft size={14} /> : <ChevronsRight size={14} />}
+          </button>
+        )}
 
         {isRightRetracted && (
           <div className="retracted-label">Assistant</div>
