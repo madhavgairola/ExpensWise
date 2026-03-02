@@ -250,24 +250,19 @@ function App() {
               <span>ExpensWise</span>
             </div>
             <button onClick={() => setIsRightRetracted(false)} className="action-btn">
-              <MessageSquare size={24} color="#818cf8" />
+              <MessageSquare size={24} color="var(--text-primary)" />
             </button>
           </div>
         )}
 
         <header className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
           <div>
-            <h1 style={{ fontSize: '1.875rem', fontWeight: 700 }}>Overview</h1>
-            <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
-              Welcome back to your financial control center.
-              {analytics && (
-                <span style={{ marginLeft: '0.5rem', color: 'var(--accent-primary)', fontWeight: 600 }}>
-                  — {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][analytics.month - 1]} {analytics.year}
-                </span>
-              )}
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Overview</h1>
+            <p style={{ color: 'var(--accent-primary)', marginTop: '0.25rem', fontWeight: 600 }}>
+              {analytics ? `${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][analytics.month - 1]} ${analytics.year}` : 'Loading...'}
             </p>
           </div>
-          <button className="card glass-card export-btn" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', color: 'white' }} onClick={() => alert("To be added soon!")}>
+          <button className="card glass-card export-btn" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', color: 'white' }} onClick={() => alert("To be added soon!")}>
             <Download size={18} />
             Export CSV (Soon)
           </button>
