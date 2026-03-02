@@ -449,3 +449,10 @@
     border-bottom: 1px solid var(--border-color);
   }
 }
+
+/* Laptop Aspect Ratio Scaling */
+@media (min-width: 769px) and (max-width: 1440px) {
+  .app-container {
+    zoom: 0.8;
+  }
+}
