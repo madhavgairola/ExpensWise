@@ -461,5 +461,13 @@
 @media (min-width: 769px) {
   .app-container {
     zoom: 0.8;
+    min-height: 125vh;
+    min-height: 125dvh;
+  }
+
+  .sidebar,
+  .right-sidebar {
+    height: 125vh;
+    height: 125dvh;
   }
 }
