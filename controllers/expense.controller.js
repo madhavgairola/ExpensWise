@@ -3,8 +3,6 @@ const analyticsService = require('../services/analytics.service');
 
 const uploadCSV = async (req, res) => {
     try {
-        // Assuming multer is configured in the router file just before reaching this controller.
-        // For simplicity, we'll setup multer here.
         const multer = require('multer');
         const upload = multer({ dest: 'uploads/' }).single('file');
 
@@ -18,7 +16,7 @@ const uploadCSV = async (req, res) => {
                 return res.status(400).json({ error: 'No file uploaded' });
             }
 
-            const result = await expenseService.processCSV(file.path);
+            const result = await expenseService.processCSV(file.path, req.user.id);
             res.status(200).json(result);
         });
     } catch (error) {
@@ -30,12 +28,13 @@ const uploadCSV = async (req, res) => {
 const getDashboardAnalytics = async (req, res) => {
     try {
         const { month, year } = req.query;
+        const userId = req.user.id;
 
         const currentDate = new Date();
         const queryMonth = month ? parseInt(month) : currentDate.getUTCMonth() + 1;
         const queryYear = year ? parseInt(year) : currentDate.getUTCFullYear();
 
-        const result = await analyticsService.getDashboardAnalytics(queryMonth, queryYear);
+        const result = await analyticsService.getDashboardAnalytics(queryMonth, queryYear, userId);
         res.status(200).json(result);
     } catch (error) {
         console.error('Error fetching dashboard analytics:', error);
@@ -45,7 +44,8 @@ const getDashboardAnalytics = async (req, res) => {
 
 const exportCSV = async (req, res) => {
     try {
-        const csvData = await expenseService.getExpensesAsCSV();
+        const userId = req.user.id;
+        const csvData = await expenseService.getExpensesAsCSV(userId);
 
         res.setHeader('Content-Type', 'text/csv');
         res.setHeader('Content-Disposition', 'attachment; filename=expenses.csv');
@@ -58,7 +58,8 @@ const exportCSV = async (req, res) => {
 
 const getHistory = async (req, res) => {
     try {
-        const result = await analyticsService.getHistory();
+        const userId = req.user.id;
+        const result = await analyticsService.getHistory(userId);
         res.status(200).json(result);
     } catch (error) {
         console.error('Error fetching historical analytics:', error);
@@ -69,7 +70,8 @@ const getHistory = async (req, res) => {
 const updateExpense = async (req, res) => {
     try {
         const { id } = req.params;
-        const result = await expenseService.updateExpense(id, req.body);
+        const userId = req.user.id;
+        const result = await expenseService.updateExpense(id, req.body, userId);
         res.status(200).json(result);
     } catch (error) {
         console.error('Error updating expense:', error);
@@ -77,14 +79,11 @@ const updateExpense = async (req, res) => {
     }
 };
 
-const deleteExpense = async (id_param) => {
-    // This is for internal use or simple router call if id from params
-};
-
 const deleteExpenseHandler = async (req, res) => {
     try {
         const { id } = req.params;
-        await expenseService.deleteExpense(id);
+        const userId = req.user.id;
+        await expenseService.deleteExpense(id, userId);
         res.status(200).json({ success: true, message: 'Expense deleted successfully' });
     } catch (error) {
         console.error('Error deleting expense:', error);
@@ -94,7 +93,8 @@ const deleteExpenseHandler = async (req, res) => {
 
 const deleteLastTransaction = async (req, res) => {
     try {
-        const result = await expenseService.deleteLastTransaction();
+        const userId = req.user.id;
+        const result = await expenseService.deleteLastTransaction(userId);
         if (!result) {
             return res.status(404).json({ error: 'No transactions found to delete' });
         }

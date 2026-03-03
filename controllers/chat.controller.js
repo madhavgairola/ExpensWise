@@ -8,7 +8,8 @@ const handleChatInput = async (req, res) => {
             return res.status(400).json({ error: 'Message is required' });
         }
 
-        const result = await chatService.processInteraction(message);
+        const userId = req.user.id;
+        const result = await chatService.processInteraction(message, userId);
         res.status(200).json(result);
     } catch (error) {
         console.error('Error handling chat input:', error);

@@ -1,25 +1,30 @@
 const prisma = require('../utils/prisma');
 const geminiService = require('./gemini.service');
 
-const getDashboardAnalytics = async (month, year) => {
-    // 1. Get total budget for the month
-    const budget = await prisma.budget.findUnique({
-        where: {
-            month_year: {
-                month,
-                year
-            }
-        }
-    });
-
-    const budgetTotal = budget ? budget.totalAmount : 0;
-
-    // 2. Get all expenses for the month
+const getDashboardAnalytics = async (month, year, userId) => {
+    // 1. Get all income additions for the month to calculate budget
     const startDate = new Date(Date.UTC(year, month - 1, 1));
     const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
 
+    const incomes = await prisma.income.findMany({
+        where: {
+            userId: userId || null,
+            transactionDate: {
+                gte: startDate,
+                lte: endDate
+            }
+        },
+        orderBy: {
+            transactionDate: 'desc'
+        }
+    });
+
+    const budgetTotal = incomes.reduce((sum, current) => sum + current.amount, 0);
+
+    // 2. Get all expenses for the month
     const expenses = await prisma.expense.findMany({
         where: {
+            userId: userId || null,
             transactionDate: {
                 gte: startDate,
                 lte: endDate
@@ -56,6 +61,7 @@ const getDashboardAnalytics = async (month, year) => {
 
     // 4. Get the last 10 transactions globally for the dashboard view
     const recentTransactions = await prisma.expense.findMany({
+        where: { userId: userId || null },
         take: 10,
         orderBy: {
             transactionDate: 'desc'
@@ -80,6 +86,7 @@ const getDashboardAnalytics = async (month, year) => {
 
         const prevExpenses = await prisma.expense.findMany({
             where: {
+                userId: userId || null,
                 transactionDate: {
                     gte: prevMonthStart,
                     lte: prevMonthEnd
@@ -118,42 +125,39 @@ const getDashboardAnalytics = async (month, year) => {
     return {
         ...metrics,
         expenses,
+        incomes,
         recentTransactions,
         comparison,
         smartInsight
     };
 };
 
-const getHistory = async () => {
+const getHistory = async (userId) => {
     try {
         const history = [];
         const currentDate = new Date();
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-        // 1. Fetch all expenses to bucket them locally (efficient for personal trackers, avoids N+1 queries)
+        // 1. Fetch all expenses to bucket them locally
         const allExpenses = await prisma.expense.findMany({
+            where: { userId: userId || null },
             orderBy: { transactionDate: 'desc' }
         });
 
         const currentYear = currentDate.getUTCFullYear();
         const currentMonth = currentDate.getUTCMonth();
 
-        let monthsToFetch = 1; // Default to at least the current month
+        let monthsToFetch = 1;
 
         if (allExpenses.length > 0) {
-            // Find the oldest record 
             const oldestDate = allExpenses[allExpenses.length - 1].transactionDate;
             const oldestYear = oldestDate.getUTCFullYear();
             const oldestMonth = oldestDate.getUTCMonth();
-
-            // Calculate how many months between now and the oldest transaction
             monthsToFetch = (currentYear - oldestYear) * 12 + (currentMonth - oldestMonth) + 1;
             if (monthsToFetch < 1) monthsToFetch = 1;
         }
 
-        // 2. Iterate dynamically based on the age of the oldest transaction
         for (let i = 0; i < monthsToFetch; i++) {
-            // Use Date.UTC to get the first day of the target month in UTC
             const d = new Date(Date.UTC(currentYear, currentMonth - i, 1));
             const month = d.getUTCMonth() + 1;
             const year = d.getUTCFullYear();
@@ -161,7 +165,6 @@ const getHistory = async () => {
             const startDate = new Date(Date.UTC(year, month - 1, 1));
             const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
 
-            // Bucket dynamically from memory
             const monthExpenses = allExpenses.filter(e =>
                 e.transactionDate >= startDate && e.transactionDate <= endDate
             );

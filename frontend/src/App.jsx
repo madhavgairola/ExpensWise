@@ -25,14 +25,18 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import Auth from './pages/Auth';
+import Budgets from './components/Budgets';
 import {
   getDashboardAnalytics,
   sendChatMessage,
   getHistory,
   deleteExpense,
-  updateExpense
+  updateExpense,
+  guestLogin
 } from './api';
 import './App.css';
+import { LogOut } from 'lucide-react';
 
 function App() {
   const [analytics, setAnalytics] = useState(null);
@@ -51,6 +55,28 @@ function App() {
   const [isLeftRetracted, setIsLeftRetracted] = useState(false);
   const [isRightRetracted, setIsRightRetracted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [user, setUser] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
+    if (savedUser && token) {
+      setUser(JSON.parse(savedUser));
+    }
+    setAuthChecked(true);
+  }, []);
+
+  const handleAuthSuccess = (userData) => {
+    setUser(userData);
+    fetchData();
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    setUser(null);
+  };
 
   useEffect(() => {
     let lastIsMobile = window.innerWidth <= 768;
@@ -136,8 +162,10 @@ function App() {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (user) {
+      fetchData();
+    }
+  }, [user]);
 
   const handleSendChat = async (e) => {
     e.preventDefault();
@@ -190,9 +218,21 @@ function App() {
     }
   };
 
-  if (loading) {
+  if (!authChecked) {
     return (
-      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0c' }}>
+        <BrainCircuit className="animate-spin" color="#3ecf8e" size={48} />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Auth onAuthSuccess={handleAuthSuccess} />;
+  }
+
+  if (loading && !analytics) {
+    return (
+      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0c' }}>
         <BrainCircuit className="animate-pulse" color="#3ecf8e" size={48} />
       </div>
     );
@@ -246,13 +286,28 @@ function App() {
             <CreditCard size={20} />
             <span>Transactions</span>
           </a>
-          <a href="#" className="nav-item" title="Budgets" onClick={(e) => { e.preventDefault(); alert("To be added soon!"); }}>
+          <a
+            href="#"
+            className={`nav-item ${activeTab === 'budgets' ? 'active' : ''}`}
+            onClick={(e) => { e.preventDefault(); setActiveTab('budgets'); }}
+            title="Budgets"
+          >
             <Target size={20} />
-            <span>Budgets (Soon)</span>
+            <span>Budgets</span>
           </a>
           <a href="#" className="nav-item" title="Import" onClick={(e) => { e.preventDefault(); alert("To be added soon!"); }}>
             <FileUp size={20} />
             <span>Import (Soon)</span>
+          </a>
+          <a
+            href="#"
+            className="nav-item"
+            style={{ marginTop: 'auto', color: '#f43f5e' }}
+            onClick={(e) => { e.preventDefault(); handleLogout(); }}
+            title="Logout"
+          >
+            <LogOut size={20} />
+            <span>Logout</span>
           </a>
         </nav>
 
@@ -305,18 +360,28 @@ function App() {
 
         <header className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
           <div>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Overview</h1>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>
+              {activeTab === 'dashboard' ? 'Overview' : activeTab === 'transactions' ? 'Transactions Archive' : 'Budgets'}
+            </h1>
             <p style={{ color: 'var(--accent-primary)', marginTop: '0.25rem', fontWeight: 600 }}>
               {analytics ? `${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][analytics.month - 1]} ${analytics.year}` : 'Loading...'}
             </p>
           </div>
-          <button className="card glass-card export-btn" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', color: 'white' }} onClick={() => alert("To be added soon!")}>
-            <Download size={18} />
-            Export CSV (Soon)
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div className="card glass-card user-badge" style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#3ecf8e' }} />
+              <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>{user.name || user.email}</span>
+            </div>
+            <button className="card glass-card export-btn" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', color: 'white' }} onClick={() => alert("To be added soon!")}>
+              <Download size={18} />
+              Export (Soon)
+            </button>
+          </div>
         </header>
 
-        {activeTab === 'dashboard' ? (
+        {activeTab === 'budgets' ? (
+          <Budgets user={user} />
+        ) : activeTab === 'dashboard' ? (
           <>
             <div className="grid">
               {/* Budget Progress Card */}

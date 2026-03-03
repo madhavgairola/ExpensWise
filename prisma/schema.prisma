@@ -12,6 +12,17 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  name      String?
+  expenses  Expense[]
+  incomes   Income[]
+  budgets   Budget[]
+  createdAt DateTime  @default(now())
+}
+
 model Expense {
   id              String   @id @default(uuid())
   amount          Float
@@ -20,6 +31,18 @@ model Expense {
   subcategory     String
   transactionDate DateTime
   source          String // chat or csv
+  userId          String?
+  user            User?     @relation(fields: [userId], references: [id])
+  createdAt       DateTime @default(now())
+}
+
+model Income {
+  id              String   @id @default(uuid())
+  amount          Float
+  description     String?
+  transactionDate DateTime @default(now())
+  userId          String?
+  user            User?     @relation(fields: [userId], references: [id])
   createdAt       DateTime @default(now())
 }
 
@@ -28,9 +51,11 @@ model Budget {
   month       Int
   year        Int
   totalAmount Float
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id])
   createdAt   DateTime @default(now())
 
-  @@unique([month, year])
+  @@unique([userId, month, year])
 }
 
 model CategoryRule {

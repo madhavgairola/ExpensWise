@@ -3,7 +3,7 @@ const analyticsService = require('./analytics.service');
 const geminiService = require('./gemini.service');
 
 // Intelligent Fallback Logic (Regex-based)
-const fallbackProcess = async (message) => {
+const fallbackProcess = async (message, userId) => {
     const segments = message.includes(';') ? message.split(';') : [message];
     const results = [];
     let finalIntent = 'ADD_EXPENSE';
@@ -14,11 +14,9 @@ const fallbackProcess = async (message) => {
 
         const segLower = segTrim.toLowerCase();
 
-        // Extract Amount and Date
         let extractedDate = undefined;
         let amountMatchRaw = "";
 
-        // 1. Check for starting dates (e.g. "yesterday", "12", "12 Jan", "12 Jan 2025")
         if (segLower.startsWith('yesterday')) {
             const d = new Date();
             d.setDate(d.getDate() - 1);
@@ -49,11 +47,9 @@ const fallbackProcess = async (message) => {
             if (numberMatches[0][2]) amount *= 1000;
             amountMatchRaw = numberMatches[0][0];
         } else if (numberMatches.length > 1) {
-            // First number might be the date. If it's small, pick the second one.
             const firstNum = parseFloat(numberMatches[0][1]) * (numberMatches[0][2] ? 1000 : 1);
             const secondNum = parseFloat(numberMatches[1][1]) * (numberMatches[1][2] ? 1000 : 1);
 
-            // If the first number could be a date (<=31, no currency symbol, no 'k' suffix), take the second number
             if (firstNum <= 31 && numberMatches[0][0].indexOf('₹') === -1 && numberMatches[0][0].indexOf('$') === -1 && !numberMatches[0][2]) {
                 amount = secondNum;
                 amountMatchRaw = numberMatches[1][0];
@@ -63,7 +59,6 @@ const fallbackProcess = async (message) => {
             }
         }
 
-        // 1. Detect Intent
         let segIntent = 'ADD_EXPENSE';
         const addBudgetKeywords = ['bonus', 'salary', 'received', 'income', 'gift', 'earned', 'extra', 'add'];
         const setBudgetKeywords = ['set', 'update', 'decrease', 'change', 'new'];
@@ -79,13 +74,10 @@ const fallbackProcess = async (message) => {
             segIntent = 'QUERY_ANALYTICS';
         }
 
-        // Special case: if any segment is a query/delete, that becomes the primary intent
         if (segIntent !== 'ADD_EXPENSE') finalIntent = segIntent;
 
-        // 2. Prepare Data
         if (segIntent === 'ADD_EXPENSE' && amount > 0) {
             let description = segTrim.replace(amountMatchRaw, '').trim();
-            // remove leading date representations to clean up description
             description = description.replace(/^(yesterday|\d{1,2}(?:\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*(?:\s+20\d{2})?)?)\s+/i, '').trim();
             description = description.replace(/on|for|spent|paid|\bneed\b|\bwant\b/gi, '').trim() || 'Expense';
 
@@ -97,9 +89,9 @@ const fallbackProcess = async (message) => {
                 date: extractedDate
             });
         } else if (segIntent === 'ADD_BUDGET' && amount > 0) {
-            return { intent: 'ADD_BUDGET', data: { amount } };
+            return { intent: 'ADD_BUDGET', data: { amount, date: extractedDate } };
         } else if (segIntent === 'SET_BUDGET' && amount > 0) {
-            return { intent: 'SET_BUDGET', data: { amount } };
+            return { intent: 'SET_BUDGET', data: { amount, date: extractedDate } };
         } else if (segIntent === 'DELETE_LAST') {
             return { intent: 'DELETE_LAST', data: null };
         } else if (segIntent === 'QUERY_ANALYTICS') {
@@ -110,15 +102,14 @@ const fallbackProcess = async (message) => {
     return { intent: finalIntent, data: results };
 };
 
-const processInteraction = async (message) => {
-    // 1. Handle Semicolon Batching at the entry point
+const processInteraction = async (message, userId) => {
     if (message.includes(';')) {
         const segments = message.split(';').map(s => s.trim()).filter(Boolean);
         const combinedResults = [];
         let finalResponse = "";
 
         for (const segment of segments) {
-            const result = await processInteraction(segment);
+            const result = await processInteraction(segment, userId);
             if (result.data) {
                 if (Array.isArray(result.data)) combinedResults.push(...result.data);
                 else combinedResults.push(result.data);
@@ -128,7 +119,7 @@ const processInteraction = async (message) => {
 
         return {
             message: combinedResults.length > 0 ? `Processed ${combinedResults.length} entries. ${finalResponse}` : finalResponse,
-            intent: 'ADD_EXPENSE', // Assume batching is primarily for expenses
+            intent: 'ADD_EXPENSE',
             data: combinedResults,
             isAI: true
         };
@@ -137,7 +128,6 @@ const processInteraction = async (message) => {
     let aiResult = null;
     let isAI = false;
 
-    // 2. Try smart classification from Gemini
     try {
         aiResult = await geminiService.classifyAndParseMessage(message);
         if (aiResult && aiResult.intent !== 'UNKNOWN') {
@@ -147,9 +137,8 @@ const processInteraction = async (message) => {
         console.warn("Gemini 2.0 error, switching to Fallback Engine:", error.message);
     }
 
-    // 3. Fallback for AI failures or poor results
     if (!isAI || (aiResult.intent === 'ADD_EXPENSE' && (!Array.isArray(aiResult.data) || aiResult.data.length === 0))) {
-        aiResult = await fallbackProcess(message);
+        aiResult = await fallbackProcess(message, userId);
         if (aiResult.intent !== 'ADD_EXPENSE') isAI = false;
     }
 
@@ -157,7 +146,6 @@ const processInteraction = async (message) => {
         return { message: "I'm having trouble understanding that. Could you rephrase?", intent: "UNKNOWN", isAI: false };
     }
 
-    // 4. Final safety check: if intent is ADD_EXPENSE but no data exists, and it's not a query/delete, return error
     if (aiResult.intent === 'ADD_EXPENSE' && (!Array.isArray(aiResult.data) || aiResult.data.length === 0)) {
         return { message: "I couldn't find any expense details. Try phrasing it like '100 for food'.", intent: aiResult.intent, isAI: false };
     }
@@ -166,8 +154,6 @@ const processInteraction = async (message) => {
 
     switch (intent) {
         case 'ADD_EXPENSE': {
-            // Data check already performed above
-
             const createdExpenses = [];
             for (const item of data) {
                 const expense = await prisma.expense.create({
@@ -177,7 +163,8 @@ const processInteraction = async (message) => {
                         categoryType: item.categoryType || 'want',
                         subcategory: item.subcategory || 'General',
                         transactionDate: item.date ? new Date(item.date) : new Date(),
-                        source: 'chat'
+                        source: 'chat',
+                        userId
                     }
                 });
                 createdExpenses.push(expense);
@@ -197,44 +184,47 @@ const processInteraction = async (message) => {
             const amount = data?.amount || 0;
             if (amount <= 0) return { message: "Invalid budget amount.", intent, isAI: false };
 
-            const currentDate = new Date();
-            const month = currentDate.getUTCMonth() + 1;
-            const year = currentDate.getUTCFullYear();
-
-            const budget = await prisma.budget.upsert({
-                where: { month_year: { month, year } },
-                update: { totalAmount: { increment: amount } },
-                create: { month, year, totalAmount: amount }
+            const income = await prisma.income.create({
+                data: {
+                    amount,
+                    transactionDate: data.date ? new Date(data.date) : new Date(),
+                    description: 'Budget Addition (Chat)',
+                    userId
+                }
             });
 
-            return { message: `Added ₹${amount} to your budget.`, intent, data: budget, isAI };
+            return { message: `Added ₹${amount} to your budget.`, intent, data: income, isAI };
         }
 
         case 'SET_BUDGET': {
             const amount = data?.amount || 0;
             if (amount <= 0) return { message: "Invalid budget amount.", intent, isAI: false };
 
-            const currentDate = new Date();
-            const month = currentDate.getUTCMonth() + 1;
-            const year = currentDate.getUTCFullYear();
-
-            const budget = await prisma.budget.upsert({
-                where: { month_year: { month, year } },
-                update: { totalAmount: amount },
-                create: { month, year, totalAmount: amount }
+            // For SET_BUDGET via chat, we'll just treat it as an Income addition for now
+            // as the circular progress sums all incomes.
+            const income = await prisma.income.create({
+                data: {
+                    amount,
+                    transactionDate: data.date ? new Date(data.date) : new Date(),
+                    description: 'Set Budget (Chat)',
+                    userId
+                }
             });
 
-            return { message: `Set your budget to ₹${amount}.`, intent, data: budget, isAI };
+            return { message: `Set your budget/income to ₹${amount}.`, intent, data: income, isAI };
         }
 
         case 'QUERY_ANALYTICS': {
             const currentDate = new Date();
-            const analytics = await analyticsService.getDashboardAnalytics(currentDate.getUTCMonth() + 1, currentDate.getUTCFullYear());
+            const analytics = await analyticsService.getDashboardAnalytics(currentDate.getUTCMonth() + 1, currentDate.getUTCFullYear(), userId);
             return { message: `Spent: ₹${analytics.totalSpent}. Remaining: ₹${analytics.budget.remaining}.`, intent, data: analytics, isAI };
         }
 
         case 'DELETE_LAST': {
-            const result = await prisma.expense.findFirst({ orderBy: { createdAt: 'desc' } });
+            const result = await prisma.expense.findFirst({
+                where: { userId },
+                orderBy: { createdAt: 'desc' }
+            });
             if (!result) return { message: "No recently added transactions.", intent, isAI: false };
             await prisma.expense.delete({ where: { id: result.id } });
             return { message: `Deleted ₹${result.amount} for ${result.description}.`, intent, data: result, isAI };
