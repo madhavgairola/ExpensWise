@@ -1,4 +1,4 @@
-# ExpensWis
+# ExpensWise
 
 ExpensWise 2.0 is a modern, AI-powered personal finance tracker that actually helps you understand your spending habits instead of just making you stare at tables all day. Built with a sleek dark mode UI and glassmorphism components, it's designed to make budgeting feel less like a chore and more like a command center for your money.
 
