@@ -98,7 +98,7 @@ function App() {
       setLoading(false);
     }
   };
-  const getCumulativeExpensesData = () => {
+  const getDailyExpensesData = () => {
     if (!analytics || !analytics.expenses) return [];
 
     const month = analytics.month;
@@ -122,15 +122,13 @@ function App() {
       }
     });
 
-    let runningTotal = 0;
     const chartData = [];
 
     for (let i = 1; i <= totalDaysToPlot; i++) {
-      runningTotal += dailyMap[i];
       chartData.push({
         day: i,
         dayStr: `${i.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}`,
-        amount: runningTotal
+        amount: dailyMap[i]
       });
     }
 
@@ -523,11 +521,11 @@ function App() {
             <section style={{ marginTop: '2.5rem' }}>
               <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <TrendingUp size={20} color="var(--accent-primary)" />
-                Daily Cumulative Expenses
+                Daily Expenses
               </h2>
               <div className="card glass-card" style={{ padding: '2rem', height: '400px' }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={getCumulativeExpensesData()} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <LineChart data={getDailyExpensesData()} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                     <XAxis dataKey="dayStr" stroke="var(--text-secondary)" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} tickMargin={10} tickLine={false} axisLine={false} />
                     <YAxis stroke="var(--text-secondary)" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} tickMargin={10} tickLine={false} axisLine={false} tickFormatter={(val) => `₹${val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val}`} />
                     <Tooltip
