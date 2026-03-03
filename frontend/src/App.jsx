@@ -57,6 +57,7 @@ function App() {
   const [isMobile, setIsMobile] = useState(false);
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
@@ -108,7 +109,11 @@ function App() {
 
   const fetchData = async () => {
     try {
-      setLoading(true);
+      if (!analytics) {
+        setLoading(true);
+      } else {
+        setIsSyncing(true);
+      }
       const now = new Date();
       const m = now.getUTCMonth() + 1;
       const y = now.getUTCFullYear();
@@ -119,9 +124,11 @@ function App() {
       setAnalytics(analyticsData);
       setHistory(historyData);
       setLoading(false);
+      setIsSyncing(false);
     } catch (error) {
       console.error('Error fetching data:', error);
       setLoading(false);
+      setIsSyncing(false);
     }
   };
   const getDailyExpensesData = () => {
@@ -244,6 +251,32 @@ function App() {
 
   return (
     <div className="app-container">
+      {/* Global Sync Indicator */}
+      <AnimatePresence>
+        {isSyncing && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            className="card glass-card"
+            style={{
+              position: 'fixed',
+              top: '1.5rem',
+              right: '1.5rem',
+              zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.5rem 1rem',
+              boxShadow: 'var(--shadow-lg)'
+            }}
+          >
+            <div style={{ width: 14, height: 14, border: '2px solid var(--accent-primary)', borderTopColor: 'transparent', borderRadius: '50%' }} className="animate-spin" />
+            <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-secondary)', letterSpacing: '0.05em' }}>updating...</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Mobile Overlay */}
       {isMobile && (!isLeftRetracted || !isRightRetracted) && (
         <div
