@@ -24,6 +24,7 @@ import {
   Menu
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import {
   getDashboardAnalytics,
   sendChatMessage,
@@ -96,6 +97,44 @@ function App() {
       console.error('Error fetching data:', error);
       setLoading(false);
     }
+  };
+  const getCumulativeExpensesData = () => {
+    if (!analytics || !analytics.expenses) return [];
+
+    const month = analytics.month;
+    const year = analytics.year;
+    const now = new Date();
+
+    // Plot up to the current day if it's the current month, else plot all days in that month
+    const isCurrentMonth = now.getUTCMonth() + 1 === month && now.getUTCFullYear() === year;
+    const totalDaysToPlot = isCurrentMonth ? now.getUTCDate() : new Date(year, month, 0).getDate();
+
+    const dailyMap = {};
+    for (let i = 1; i <= totalDaysToPlot; i++) {
+      dailyMap[i] = 0;
+    }
+
+    analytics.expenses.forEach(exp => {
+      const date = new Date(exp.transactionDate);
+      const day = date.getUTCDate();
+      if (day <= totalDaysToPlot) {
+        dailyMap[day] += exp.amount;
+      }
+    });
+
+    let runningTotal = 0;
+    const chartData = [];
+
+    for (let i = 1; i <= totalDaysToPlot; i++) {
+      runningTotal += dailyMap[i];
+      chartData.push({
+        day: i,
+        dayStr: `${i.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}`,
+        amount: runningTotal
+      });
+    }
+
+    return chartData;
   };
 
   useEffect(() => {
@@ -477,6 +516,29 @@ function App() {
                     )}
                   </tbody>
                 </table>
+              </div>
+            </section>
+
+            {/* Daily Expenses Chart */}
+            <section style={{ marginTop: '2.5rem' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <TrendingUp size={20} color="var(--accent-primary)" />
+                Daily Cumulative Expenses
+              </h2>
+              <div className="card glass-card" style={{ padding: '2rem', height: '400px' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={getCumulativeExpensesData()} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <XAxis dataKey="dayStr" stroke="var(--text-secondary)" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} tickMargin={10} tickLine={false} axisLine={false} />
+                    <YAxis stroke="var(--text-secondary)" tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} tickMargin={10} tickLine={false} axisLine={false} tickFormatter={(val) => `₹${val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val}`} />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px' }}
+                      itemStyle={{ color: 'var(--accent-primary)' }}
+                      formatter={(value) => [`₹${value}`, 'Total Spent']}
+                      labelStyle={{ color: 'var(--text-primary)', marginBottom: '4px' }}
+                    />
+                    <Line type="monotone" dataKey="amount" stroke="var(--accent-primary)" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: 'var(--bg-secondary)' }} activeDot={{ r: 6, fill: 'var(--accent-primary)', stroke: 'var(--text-primary)' }} label={{ position: 'top', formatter: (val) => val >= 1000 ? `₹${(val / 1000).toFixed(1)}k` : `₹${val}`, fill: 'var(--text-secondary)', fontSize: 12, dy: -10 }} />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             </section>
           </>
