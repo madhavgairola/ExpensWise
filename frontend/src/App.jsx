@@ -127,6 +127,9 @@ function App() {
       setIsSyncing(false);
     } catch (error) {
       console.error('Error fetching data:', error);
+      if (error.response && error.response.status === 401) {
+        handleLogout();
+      }
       setLoading(false);
       setIsSyncing(false);
     }
@@ -241,6 +244,15 @@ function App() {
     return (
       <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0c' }}>
         <BrainCircuit className="animate-pulse" color="#3ecf8e" size={48} />
+      </div>
+    );
+  }
+
+  if (!loading && !analytics) {
+    return (
+      <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0a0a0c', color: 'white' }}>
+        <p style={{ color: '#f43f5e', marginBottom: '1rem', fontSize: '1.25rem' }}>Failed to load dashboard. The server might be unreachable.</p>
+        <button className="card glass-card export-btn" onClick={fetchData} style={{ padding: '0.75rem 1.5rem', background: 'var(--accent-primary)', border: 'none', borderRadius: '8px', cursor: 'pointer', color: '#fff', fontSize: '1rem' }}>Retry</button>
       </div>
     );
   }
