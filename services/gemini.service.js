@@ -51,6 +51,7 @@ const classifyAndParseMessage = async (message) => {
     - For ADD_EXPENSE, "need" is for essentials (Rent, Groceries, Utils, Metro, Bills, Food, College), "want" is for everything else.
     - For ADD_EXPENSE, if the user explicitly specifies a date (e.g., "12", "12 Feb", "yesterday"), extract it as "date" in YYYY-MM-DD format using the Current Date Context. If no date is specified, omit the "date" field entirely.
     - CRITICAL: Do NOT include the words "need" or "want" in the extracted description (e.g., "food need 300" -> description should be "Food").
+    - MATH EXPRESSIONS: If the amount is provided as a mathematical expression (e.g., "100+30+32", "50*2", "100-20"), calculate the result and return the final computed number as the amount.
     - Return ONLY the JSON code block.
     `;
 
