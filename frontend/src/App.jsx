@@ -242,8 +242,26 @@ function App() {
 
   if (loading && !analytics) {
     return (
-      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0c' }}>
-        <BrainCircuit className="animate-pulse" color="#3ecf8e" size={48} />
+      <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0a0a0c' }}>
+        <BrainCircuit className="animate-pulse" color="#3ecf8e" size={56} style={{ filter: 'drop-shadow(0 0 15px rgba(62,207,142,0.4))' }} />
+        
+        <div style={{ marginTop: '2.5rem', width: '240px', height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
+          <motion.div 
+            initial={{ width: "0%" }}
+            animate={{ width: "95%" }}
+            transition={{ duration: 50, ease: "easeOut" }}
+            style={{ height: '100%', background: '#3ecf8e', borderRadius: '4px', boxShadow: '0 0 10px rgba(62, 207, 142, 0.5)' }}
+          />
+        </div>
+        
+        <motion.div
+          animate={{ opacity: [0.4, 1, 0.4] }}
+          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem', marginTop: '1.25rem' }}
+        >
+          <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600 }}>Waking up server</span>
+          <span style={{ color: 'var(--text-tertiary)', fontSize: '0.65rem', opacity: 0.5 }}>This may take up to 50s on free hosting</span>
+        </motion.div>
       </div>
     );
   }
