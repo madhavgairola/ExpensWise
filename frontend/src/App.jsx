@@ -255,12 +255,12 @@ function App() {
         </div>
         
         <motion.div
-          animate={{ opacity: [0.4, 1, 0.4] }}
-          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem', marginTop: '1.25rem' }}
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+          style={{ position: 'absolute', bottom: '2.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem' }}
         >
-          <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600 }}>Waking up server</span>
-          <span style={{ color: 'var(--text-tertiary)', fontSize: '0.65rem', opacity: 0.5 }}>This may take up to 50s on free hosting</span>
+          <span style={{ color: '#3ecf8e', fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 700, textShadow: '0 0 10px rgba(62,207,142,0.5)' }}>Waking up server</span>
+          <span style={{ color: 'var(--text-secondary)', fontSize: '0.55rem', opacity: 0.6, letterSpacing: '0.05em' }}>This may take up to 50s on free hosting</span>
         </motion.div>
       </div>
     );
