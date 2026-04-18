@@ -29,6 +29,7 @@ import Auth from './pages/Auth';
 import Budgets from './components/Budgets';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import {
   getDashboardAnalytics,
   sendChatMessage,
   getHistory,
