@@ -27,7 +27,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import Auth from './pages/Auth';
 import Budgets from './components/Budgets';
-import {
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
   getDashboardAnalytics,
   sendChatMessage,
   getHistory,
@@ -240,32 +241,7 @@ function App() {
     return <Auth onAuthSuccess={handleAuthSuccess} />;
   }
 
-  if (loading && !analytics) {
-    return (
-      <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0a0a0c' }}>
-        <BrainCircuit className="animate-pulse" color="#3ecf8e" size={56} style={{ filter: 'drop-shadow(0 0 15px rgba(62,207,142,0.4))' }} />
-        
-        <div style={{ marginTop: '2.5rem', width: '240px', height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
-          <motion.div 
-            initial={{ width: "0%" }}
-            animate={{ width: "95%" }}
-            transition={{ duration: 50, ease: "easeOut" }}
-            style={{ height: '100%', background: '#3ecf8e', borderRadius: '4px', boxShadow: '0 0 10px rgba(62, 207, 142, 0.5)' }}
-          />
-        </div>
-        
-        <motion.div
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-          style={{ position: 'absolute', bottom: '2.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem' }}
-        >
-          <span style={{ color: '#3ecf8e', fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 700, textShadow: '0 0 10px rgba(62,207,142,0.5)' }}>Waking up server</span>
-          <span style={{ color: 'var(--text-secondary)', fontSize: '0.55rem', opacity: 0.6, letterSpacing: '0.05em' }}>This may take up to 50s on free hosting</span>
-        </motion.div>
-      </div>
-    );
-  }
-
+ 
   if (!loading && !analytics) {
     return (
       <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0a0a0c', color: 'white' }}>
@@ -427,7 +403,7 @@ function App() {
               {activeTab === 'dashboard' ? 'Overview' : activeTab === 'transactions' ? 'Transactions Archive' : 'Budgets'}
             </h1>
             <p style={{ color: 'var(--accent-primary)', marginTop: '0.25rem', fontWeight: 600 }}>
-              {analytics ? `${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][analytics.month - 1]} ${analytics.year}` : 'Loading...'}
+              {analytics ? `${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][analytics.month - 1]} ${analytics.year}` : <Skeleton width={100} baseColor="#1e1e24" highlightColor="#2d2d38" />}
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -442,7 +418,44 @@ function App() {
           </div>
         </header>
 
-        {activeTab === 'budgets' ? (
+        {loading && !analytics ? (
+          <SkeletonTheme baseColor="#1e1e24" highlightColor="#2d2d38">
+            <div className="grid">
+              <div className="card">
+                <div className="card-title"><Skeleton width={120} /></div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', marginTop: '1rem' }}>
+                  <Skeleton circle width={90} height={90} />
+                  <div style={{ flex: 1 }}>
+                    <Skeleton height={28} width="60%" style={{ marginBottom: '0.5rem' }} />
+                    <Skeleton height={14} width="80%" />
+                  </div>
+                </div>
+              </div>
+              <div className="card">
+                <div className="card-title"><Skeleton width={100} /></div>
+                <div style={{ marginTop: '1rem' }}><Skeleton height={32} width="40%" /></div>
+                <div style={{ marginTop: '1rem' }}><Skeleton height={14} width="60%" /></div>
+              </div>
+              <div className="card">
+                <div className="card-title"><Skeleton width={130} /></div>
+                <div style={{ marginTop: '1.5rem' }}>
+                  <Skeleton height={12} style={{ borderRadius: 6 }} />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
+                    <Skeleton width={70} />
+                    <Skeleton width={70} />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <section style={{ marginTop: '3rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <Skeleton width={180} height={24} />
+                <Skeleton width={80} height={32} borderRadius={8} />
+              </div>
+              <Skeleton count={5} height={40} style={{ marginBottom: '0.5rem', borderRadius: 8 }} />
+            </section>
+          </SkeletonTheme>
+        ) : activeTab === 'budgets' ? (
           <Budgets user={user} />
         ) : activeTab === 'dashboard' ? (
           <>
