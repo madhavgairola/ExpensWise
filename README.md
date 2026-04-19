@@ -2,7 +2,7 @@
 
 ExpensWise is a smart personal finance tracker that doesn't feel like a second job. Instead of wrestling with complex forms or staring at boring spreadsheets, you just talk to it. Built with a focus on speed, AI-driven insights, and a sleek dark-mode aesthetic.
 
-[Live Demo](https://expenswise.vercel.app) (Placeholder - update with your actual link)
+[Live Demo](https://expens-wise.vercel.app)
 
 ## Why I Built This
 Most finance apps are a chore. You spend more time categorizing transactions than actually understanding where your money is going. I wanted something where I could just type `200 for pizza` or `paid 500 for rent need` and have it handled automatically. ExpensWise takes away the friction of manual data entry so you actually *want* to track your spend.
@@ -35,10 +35,13 @@ When you type `food 100 need; taxi 200 want`, the backend:
 ## Screenshots
 <div align="center">
   <img src="imgs/landing.png" alt="Landing Page" width="800px">
+  <p><em>Modern landing page with a glassmorphism feel</em></p>
   <br>
   <img src="imgs/budget.png" alt="Dashboard" width="800px">
+  <p><em>Real-time analytics dashboard tracking needs vs. wants</em></p>
   <br>
-  <img src="imgs/login.png" alt="Login" width="400px">
+  <img src="imgs/login.png" alt="Login" width="800px">
+  <p><em>Clean, distraction-free authentication</em></p>
 </div>
 
 ## Getting Started
