@@ -1,70 +1,59 @@
-# ExpensWise
+# ExpensWise 2.0 💸
 
-ExpensWise 2.0 is a modern, AI-powered personal finance tracker that actually helps you understand your spending habits instead of just making you stare at tables all day. Built with a sleek dark mode UI and glassmorphism components, it's designed to make budgeting feel less like a chore and more like a command center for your money.
+ExpensWise is a smart personal finance tracker that doesn't feel like a second job. Instead of wrestling with complex forms or staring at boring spreadsheets, you just talk to it. Built with a focus on speed, AI-driven insights, and a sleek dark-mode aesthetic.
+
+[Live Demo](https://expenswise.vercel.app) (Placeholder - update with your actual link)
 
 ## Why I Built This
+Most finance apps are a chore. You spend more time categorizing transactions than actually understanding where your money is going. I wanted something where I could just type `200 for pizza` or `paid 500 for rent need` and have it handled automatically. ExpensWise takes away the friction of manual data entry so you actually *want* to track your spend.
 
-I wanted a finance app that didn't just tell me *what* I spent, but *how* I was doing compared to my usual habits. Most apps just show you a progress bar. ExpensWise takes your transaction history, figures out your average daily spend, and uses Google's Gemini AI to give you personalized, actionable insights—like telling you to chill on the coffee purchases if you're trending over budget.
-
-## Features that Actually Matter
-
-*   **Smart AI Insights:** Connects to Gemini API to analyze your spending bucket and gives you real advice based on your current trajectory.
-*   **Persistent Guest Mode:** Let's say you just want to toy around with the app without committing to an account—Guest Mode uses a shared persistent account so you can actually see data carry over.
-*   **Dynamic Dashboard:** Real-time metrics comparing your current run-rate against your historical averages.
-*   **Premium UI:** No boring generic spreadsheets. Everything is wrapped in a custom mint-green (`#3ecf8e`) and dark-themed interface built from scratch.
+## Features
+- **Natural Language Parsing:** Log expenses, set budgets, or query your history using raw text.
+- **Smart Insights:** Uses Gemini AI to analyze your spending habits and give you blunt, actionable advice.
+- **Needs vs. Wants:** Automatically categorizes your spend so you know if you're over-investing in "wants."
+- **Persistent Guest Mode:** Try it out without an account—your data persists across sessions.
+- **CSV Export:** Because sometimes you just need to crunch the numbers in a sheet.
+- **Responsive Dashboard:** Real-time metrics comparing your current run-rate against historical averages.
 
 ## Tech Stack
+- **Frontend:** React + Vite (Vanilla CSS, Framer Motion, Recharts)
+- **Backend:** Node.js (Express 5.0)
+- **Database:** PostgreSQL (via Prisma ORM)
+- **AI Integration:** Google Gemini API
+- **Auth:** JWT + Bcrypt
 
-*   **Frontend:** React (Vite) with Lucide Icons and Framer Motion for buttery smooth page transitions.
-*   **Backend:** Node.js & Express.
-*   **Database:** PostgreSQL handled entirely by Prisma ORM.
-*   **Auth:** Custom JWT-based authentication with bcrypt hashing.
-*   **AI:** Google Generative AI integration.
+## Under the Hood: Natural Language Parsing
+The "magic" behind the input box isn't just a bunch of regex. It uses a custom-prompted Gemini Flash model to perform **Intent Classification** and **Entity Extraction** in a single pass.
 
-## Getting Started Locally
+When you type `food 100 need; taxi 200 want`, the backend:
+1. Identifies multiple transactions separated by `;`.
+2. Classifies each as an `ADD_EXPENSE`.
+3. Extracts the `amount`, `description`, and `categoryType`.
+4. Calculates any math expressions (e.g., `100+50 for breakfast`).
+5. Returns structured JSON that the database can actually understand.
 
-If you want to spin this up on your own machine, here's how:
+## Screenshots
+<div align="center">
+  <img src="imgs/landing.png" alt="Landing Page" width="800px">
+  <br>
+  <img src="imgs/budget.png" alt="Dashboard" width="800px">
+  <br>
+  <img src="imgs/login.png" alt="Login" width="400px">
+</div>
 
-1.  **Clone the repo:**
-    ```bash
-    git clone https://github.com/yourusername/expenswise-2.0.git
-    cd expenswise-2.0
-    ```
-
-2.  **Install dependencies (for both folders):**
-    ```bash
-    npm install
-    cd frontend && npm install && cd ..
-    ```
-
-3.  **Set up your environment variables:**
-    Create a `.env` file in the root directory. You'll need:
-    ```env
-    DATABASE_URL="postgresql://user:password@localhost:5432/expenswisedb"
-    JWT_SECRET="your_super_secret_key"
-    GEMINI_API_KEY="your_google_gemini_api_key_here"
-    PORT=3000
-    ```
-
-4.  **Push the database schema:**
-    ```bash
-    npx prisma db push
-    ```
-
-5.  **Run the app:**
-    Start the backend server:
-    ```bash
-    npm run dev
-    ```
-    In a new terminal, start the React frontend:
-    ```bash
-    cd frontend && npm run dev
-    ```
-
-## What's Next?
-- [ ] Exporting data to CSV (coming soon!)
-- [ ] More granular category tagging
-- [ ] Better mobile responsiveness for the chat widget
+## Getting Started
+1. **Clone & Install:**
+   ```bash
+   npm install
+   cd frontend && npm install
+   ```
+2. **Environment Setup:**
+   Create a `.env` in the root with `DATABASE_URL`, `GEMINI_API_KEY`, and `JWT_SECRET`.
+3. **Run:**
+   ```bash
+   npm run dev       # Backend
+   cd frontend && npm run dev  # Frontend
+   ```
 
 ---
-*If this project helps you get your finances in check, consider dropping a ⭐ on the repo!*
+*Built for developers who care about where their money goes.*
