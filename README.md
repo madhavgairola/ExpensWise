@@ -35,13 +35,13 @@ When you type `food 100 need; taxi 200 want`, the backend:
 ## Screenshots
 <div align="center">
   <img src="imgs/landing.png" alt="Landing Page" width="800px">
-  <p><em>Modern landing page with a glassmorphism feel</em></p>
+  <p><em>Landing page</em></p>
   <br>
   <img src="imgs/budget.png" alt="Dashboard" width="800px">
   <p><em>Real-time analytics dashboard tracking needs vs. wants</em></p>
   <br>
   <img src="imgs/login.png" alt="Login" width="800px">
-  <p><em>Clean, distraction-free authentication</em></p>
+  <p><em>Authentication page</em></p>
 </div>
 
 ## Getting Started
