@@ -1,4 +1,4 @@
-# ExpensWise 2.0 💸
+# ExpensWise
 
 ExpensWise is a smart personal finance tracker that doesn't feel like a second job. Instead of wrestling with complex forms or staring at boring spreadsheets, you just talk to it. Built with a focus on speed, AI-driven insights, and a sleek dark-mode aesthetic.
 
