@@ -38,7 +38,7 @@ When you type `food 100 need; taxi 200 want`, the backend:
   <p><em>Landing page</em></p>
   <br>
   <img src="imgs/budget.png" alt="Dashboard" width="800px">
-  <p><em>Real-time analytics dashboard tracking needs vs. wants</em></p>
+  <p><em>Budgeting Page</em></p>
   <br>
   <img src="imgs/login.png" alt="Login" width="800px">
   <p><em>Authentication page</em></p>
